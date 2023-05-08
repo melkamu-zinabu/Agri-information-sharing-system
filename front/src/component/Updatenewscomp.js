@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const UpdateNews = ({ match }) => {
-  const [news, setNews] = useState({});
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('');
 
   useEffect(() => {
     fetchNews();
@@ -12,38 +12,45 @@ const UpdateNews = ({ match }) => {
 
   const fetchNews = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/getnews/${match.params.id}`);
-      setNews(response.data);
-      setTitle(response.data.title);
-      setDescription(response.data.description);
+      const { id } = match.params;
+      const response = await axios.get(`http://localhost:3000/getnews/${id}`);
+      const { title, description, category } = response.data;
+      setTitle(title);
+      setDescription(description);
+      setCategory(category);
     } catch (error) {
       console.error(error);
     }
   };
 
-  const handleUpdate = () => {
-    const updatedNews = {
-      title,
-      description,
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    axios
-      .put(`http://localhost:3000/updatenews/${match.params.id}`, updatedNews)
-      .then((res) => {
-        console.log('News updated successfully');
-        // Handle any necessary UI updates or redirect to the news list page
-      })
-      .catch((err) => console.log(err));
+    try {
+      const { id } = match.params;
+      const updatedNews = { title, description, category };
+      await axios.put(`http://localhost:3000/updatenews/${id}`, updatedNews);
+      // Handle success, e.g., show a success message or redirect to the news list page
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
     <div>
       <h2>Update News</h2>
-      <label>Title:</label>
-      <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
-      <label>Description:</label>
-      <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
-      <button onClick={handleUpdate}>Update</button>
+      <form onSubmit={handleSubmit}>
+        <label htmlFor="title">Title:</label>
+        <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
+
+        <label htmlFor="description">Description:</label>
+        <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} />
+
+        <label htmlFor="category">Category:</label>
+        <input type="text" id="category" value={category} onChange={(e) => setCategory(e.target.value)} />
+
+        <button type="submit">Update</button>
+      </form>
     </div>
   );
 };
