@@ -16,7 +16,36 @@ export const addnews=async(req,res,next)=>{
 //Retrieve all FarmerNews records:
 export const getnews=async(req,res,next)=>{
 try {
-    const farmerNews = await neewsfeed.find();
+    const search = req.query.search || "";
+    const filter = req.query.filter || "";// by category
+    const startDate = req.query.startDate || "";
+    const endDate = req.query.endDate || "";
+  
+
+     // Construct the query object
+     const query = {};
+     if (search) {
+       query.$or = [
+         { title: { $regex: search, $options: 'i' } },
+         { description: { $regex: search, $options: 'i' } },
+       ];
+     }
+     if (filter) {
+       query.category = filter;
+     }
+     if (startDate && endDate) {
+       query.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+     } else if (startDate) {
+       query.date = { $gte: new Date(startDate) };
+     } else if (endDate) {
+       query.date = { $lte: new Date(endDate) };
+     }
+
+
+
+
+    
+    const farmerNews = await neewsfeed.find(query);
     res.json(farmerNews);
   } catch (err) {
     console.error(err);
