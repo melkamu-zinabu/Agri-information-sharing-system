@@ -15,8 +15,14 @@ import mongoose from "mongoose";
             type: String,
             required: true,
           },
-         
-          date: Date,
+          date: {
+            type: Date,
+            default: Date.now,
+          },
+          image: {
+            data: Buffer,
+            contentType: String,
+          },
      
     });
     
