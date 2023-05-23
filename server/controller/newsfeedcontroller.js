@@ -1,9 +1,20 @@
 import neewsfeed from "../model/neewsfeed.js";
-
+import fs from 'fs'
 //Add a new FarmerNews record:
 export const addnews=async(req,res,next)=>{
+    const { category, title,description}=req.body
     try {
-        const farmerNews = new neewsfeed(req.body);
+        const farmerNews = new neewsfeed({
+            category,
+            title,
+            description,
+           image: {
+            data: fs.readFileSync("uploads/" + req.file.filename),
+            contentType: req.file.mimetype,
+          },
+        
+        
+        });
         await farmerNews.save();
         console.log(req.body)
         res.status(201).json(farmerNews);
@@ -73,9 +84,22 @@ export const getnewsbyid= async (req, res) => {
 
   export const updatenews=async (req, res) => {
     const { id } = req.params;
-  
+    const { category, title,description}=req.body
     try {
-      const farmerNews = await neewsfeed.findByIdAndUpdate(id, req.body, { new: true });
+      const farmerNews = await neewsfeed.findByIdAndUpdate(id, 
+       {
+        category,
+        title,
+        description,
+       image: {
+        data: fs.readFileSync("uploads/" + req.file.filename),
+        contentType: req.file.mimetype,
+      },
+
+       }
+        
+        ,
+        { new: true });
       if (!farmerNews) {
         return res.status(404).json({ message: 'FarmerNews not found' });
       }

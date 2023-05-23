@@ -29,7 +29,7 @@ const UpdateNews = ({ match }) => {
     try {
       const { id } = match.params;
       const updatedNews = { title, description, category };
-      await axios.put(`http://localhost:3000/updatenews/${id}`, updatedNews);
+      await axios.put(`https://red-angry-lovebird.cyclic.app/updatenews/${id}`, updatedNews);
       // Handle success, e.g., show a success message or redirect to the news list page
     } catch (error) {
       console.error(error);
