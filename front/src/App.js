@@ -4,6 +4,7 @@ import AddNews from './component/Addnewscomp';
 import UpdateNews from './component/Updatenewscomp';
 import SeasonalInfoList from './component/Viewnewsfeedcomp';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
+import CropSelectionComponent from './component/chart/Cropselectioncomp';
 function App() {
   return (
     <div className="App">
@@ -20,6 +21,7 @@ function App() {
      <AddNews/>
      <SeasonalInfoList/>
      <UpdateNews/>
+     <CropSelectionComponent/>
     </div>
   );
 }

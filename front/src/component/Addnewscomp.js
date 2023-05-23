@@ -17,7 +17,7 @@ const AddNews = () => {
   
    // http://localhost:3000/
     try {
-      const response = await axios.post('  https://red-angry-lovebird.cyclic.app/addnews',formData, {
+      const response = await axios.post('  http://localhost:3000/addnews',formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

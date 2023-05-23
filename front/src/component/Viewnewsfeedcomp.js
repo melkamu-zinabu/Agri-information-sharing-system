@@ -18,7 +18,7 @@ const SeasonalInfoList = () => {
 
   const fetchSeasonalInfo = async () => {
     try {
-      const response = await axios.get('https://red-angry-lovebird.cyclic.app/getnews/', {
+      const response = await axios.get(' http://localhost:3000/getnews/', {
         params: {
             search: searchTerm,
             filter: filterTerm,

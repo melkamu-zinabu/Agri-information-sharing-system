@@ -6,6 +6,7 @@ import  CONNECTDB  from "./config/db.js"
 //import {imageroute } from './routes/imageroute.js'
 import cors from "cors"
 import router from "./route/neewsfeedroute.js";
+import mdrouter from "./route/marketdata.js";
 dotenv.config();
 
 
@@ -22,6 +23,7 @@ const port=3000;
 
 
 app.use('/',router)
+app.use('/marketdata',mdrouter)
 
 app.listen(port,MEL);
 
