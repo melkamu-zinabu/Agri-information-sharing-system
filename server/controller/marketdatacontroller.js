@@ -34,7 +34,7 @@ export const addcrops=async(req,res,next)=>{
           .then((crop) => {
             const newMarketData = new MarketData({
               crop: crop._id,
-              date: new Date(),
+              date: new Date().toLocaleDateString(),
               price: 10.5, // Replace with the actual price
             });
 
