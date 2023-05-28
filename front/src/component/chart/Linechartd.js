@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import LineChart from './Linechart'
 import axios from 'axios';
 import { Bar, Line } from 'react-chartjs-2';
-
+import { format } from 'timeago.js'
 
 
 const CropDataComponent = ({ cropName }) => {
@@ -24,20 +24,21 @@ useEffect(() => {
   }, [cropName]);
   
  
-    const labels = cropData.map(item => item.date); // Assuming the date property exists in the crop data
+    const labels = cropData.map(item => format(item.date)); // Assuming the date property exists in the crop data
     const values = cropData.map(item => item.price); // Assuming the value property exists in the crop data
   
     const data = {
-        labels,
         datasets: [
-          {
-            label: 'Crop Data',
-            data: values,
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1,
-          },
-        ],
+            {
+              label: 'Crop Data',
+              data: values,
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1,
+            },
+          ],
+        labels,
+       
       };
   
     const options = {
@@ -51,7 +52,7 @@ useEffect(() => {
   
 
   return (
-    <div>
+    <div style={{ width: 700 }}>
     <h2>Crop Data Bar Graph</h2>
     <LineChart chartData={data} options={options} />
   </div>

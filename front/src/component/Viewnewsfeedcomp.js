@@ -112,21 +112,6 @@ const SeasonalInfoList = () => {
           />
         </div>
         </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       <h2>Seasonal Informationmmm</h2>
       {seasonalInfo.slice(0, visibleCount).map((info) => (
         <div key={info._id}>

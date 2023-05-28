@@ -7,6 +7,7 @@ import  CONNECTDB  from "./config/db.js"
 import cors from "cors"
 import router from "./route/neewsfeedroute.js";
 import mdrouter from "./route/marketdata.js";
+import jobrouter from "./route/jobroute.js";
 dotenv.config();
 
 
@@ -24,6 +25,7 @@ const port=3000;
 
 app.use('/',router)
 app.use('/marketdata',mdrouter)
+app.use('/jobs',jobrouter)
 
 app.listen(port,MEL);
 

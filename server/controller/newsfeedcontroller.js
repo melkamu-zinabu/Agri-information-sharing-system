@@ -9,11 +9,10 @@ export const addnews=async(req,res,next)=>{
             title,
             description,
            image: {
+            //is used as the file path to read the uploaded file using fs.readFileSync().
             data: fs.readFileSync("uploads/" + req.file.filename),
             contentType: req.file.mimetype,
           },
-        
-        
         });
         await farmerNews.save();
         console.log(req.body)
@@ -52,10 +51,6 @@ try {
        query.date = { $lte: new Date(endDate) };
      }
 
-
-
-
-    
     const farmerNews = await neewsfeed.find(query);
     res.json(farmerNews);
   } catch (err) {

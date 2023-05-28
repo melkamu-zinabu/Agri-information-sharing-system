@@ -14,7 +14,16 @@ import mongoose from "mongoose";
     password: {
         type: String,
         required: true
+      },
+    tokens:[{
+      token:{
+        type:String,
+        required: true
       }
+    }],
+    resetTokenExpiration: {
+      type: Date,
+    },
 });
     
 export default mongoose.model('usermodel', usermodel);
