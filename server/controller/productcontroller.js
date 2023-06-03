@@ -30,12 +30,12 @@ export const addproduct = async (req, res) => {
 };
   
 //get jobs by id it used to retieve alljobs posted by one farmer/...
-export const getproductbyid = async (req, res, next) => {
+export const getproductbyuserid = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.limit) || 10;
     const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
+    //const endIndex = startIndex + pageSize;
 
     const searchQuery = req.query.search || '';
     const userId = req.user.id;
@@ -70,13 +70,13 @@ export const getproductbyid = async (req, res, next) => {
 };
 
 
-//get all jobs
+//get all product
 export const getproduct = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.limit) || 10;
     const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
+   // const endIndex = startIndex + pageSize;
 
     const searchQuery = req.query.search || '';
 
@@ -89,7 +89,7 @@ export const getproduct = async (req, res, next) => {
       ],
     };
 
-    const totalItems = await product.countDocuments(searchOptions);
+    const totalItems = await productmodel.countDocuments(searchOptions);
 
     const product = await productmodel.find(searchOptions)
       .sort({ date: -1 }) // Sort by date field in descending order (-1)
@@ -105,7 +105,7 @@ export const getproduct = async (req, res, next) => {
 };
 
 
-/// Update Job API
+/// Update product API
 export const updateproduct = async (req, res, next) => {
   const id = req.params.id;
 

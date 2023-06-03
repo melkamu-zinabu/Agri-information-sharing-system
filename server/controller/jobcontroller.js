@@ -1,21 +1,17 @@
 import jobmodel from '../model/jobmodel.js'
 // Create a Job API
-export const addjobs = async (req, res) => {
+export const addJob = async (req, res) => {
   try {
     const userId = req.user._id; // Retrieve the user ID from req.user
-     // Assuming you are using an authentication middleware or 
-    //function that populates the req.user object with the authenticated user's information, 
-    //you can access the user's ID through req.user._id. you can pass these middleware in route folder
-  
+    
     const job = new jobmodel({
       title: req.body.title,
       description: req.body.description,
       location: req.body.location,
       company: req.body.company,
-      user: userId, // Associate the job with the user
+      user: userId, // Assign the user ID as the reference to the associated user
       date: new Date(), // Set the date field to the current date and time
-      image: {//is used as the file path to read the uploaded file using fs.readFileSync().
-    
+      image: {
         data: await fs.promises.readFile("uploads/" + req.file.filename), // Read image file asynchronously
         contentType: req.file.mimetype,
       },
@@ -28,15 +24,15 @@ export const addjobs = async (req, res) => {
     res.status(500).json({ error: 'Failed to create job' });
   }
 };
+
   
 //get jobs by id it used to retieve alljobs posted by one farmer/...
-export const getjobsbyid = async (req, res, next) => {
+export const getjobsbyuserid = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.limit) || 10;
     const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-
+   // const endIndex = startIndex + pageSize;
     const searchQuery = req.query.search || '';
     const userId = req.user.id;
      // Assuming you are using an authentication middleware or 
@@ -65,6 +61,15 @@ export const getjobsbyid = async (req, res, next) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to retrieve jobs' });
+     //in front end
+    // fetch('/api/jobs') // Replace with the actual API endpoint URL
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     // Access the jobs array from the JSON response
+    //     const receivedJobs = data.jobs;
+
+    //     // Update the state with the received jobs
+    //     setJobs(receivedJobs);
   }
 };
 
@@ -75,8 +80,7 @@ export const getjobs = async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.limit) || 10;
     const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-
+   // const endIndex = startIndex + pageSize;
     const searchQuery = req.query.search || '';
 
     const searchOptions = {
@@ -100,6 +104,17 @@ export const getjobs = async (req, res, next) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to retrieve jobs' });
+
+        //in front end
+    // fetch('/api/jobs') // Replace with the actual API endpoint URL
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     // Access the jobs array from the JSON response
+    //     const receivedJobs = data.jobs;
+
+    //     // Update the state with the received jobs
+    //     setJobs(receivedJobs);
+  
   }
 };
 

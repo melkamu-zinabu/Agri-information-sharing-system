@@ -4,18 +4,21 @@ import dotev from 'dotenv'
 dotev.config()
 export const authenticate = async (req, res, next) => {
   try {
-    const token = req.header('Authorization'); // Assuming you are passing the token in the Authorization header
+    const authHeader = req.header('Authorization'); // Assuming you are passing the token in the Authorization header
 
-    if (!token) {
+    if (!authHeader) {
       // Token not found, user is not authenticated
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
+
+    // Split the authHeader to extract the token
+    const token = authHeader.split(' ')[1];
 
     // Verify the token
     const decoded = jwt.verify(token, process.env.secret_key); // Replace 'your_secret_key' with your actual secret key
 
     // Find the user based on the decoded token
-    const user = await User.findOne({ _id: decoded._id, 'tokens.token': token });
+    const user = await usermodel.findOne({ _id: decoded.userId, 'tokens.token': token });
 
     if (!user) {
       // User not found, token is invalid or expired
@@ -32,3 +35,4 @@ export const authenticate = async (req, res, next) => {
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
+

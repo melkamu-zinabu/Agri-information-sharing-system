@@ -11,14 +11,15 @@ const storage = multer.diskStorage({
     }
   });
   // Multer file filter configuration
-const fileFilter = (req, file, cb) => {
-  // Accept only specific file types (e.g., images)
-  if (file.mimetype.startsWith('image/')) {
-    cb(null, true);
-  } else {
-    cb(new Error('Invalid file type. Only image files are allowed.'), false);
-  }
-};
+// const fileFilter = (req, file, cb) => {
+//   // Accept only specific file types (e.g., images)
+//   if (file.mimetype.startsWith('image/')) {
+//     cb(null, true);
+//   } else {
+//     cb(new Error('Invalid file type. Only image files are allowed.'), false);
+//   }
+// };
 
 // Multer upload instance
-export  const  upload = multer({ storage: storage, fileFilter: fileFilter });
+// export  const  upload = multer({ storage: storage, fileFilter: fileFilter });
+export  const  upload = multer({ storage: storage})

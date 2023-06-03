@@ -1,8 +1,11 @@
 import Express  from "express";
-import { addcrops, getcrops } from "../controller/marketdatacontroller.js";
+import { addcrops, deleteCrop, deleteMarketData, getcrops, updateMarketData } from "../controller/marketcontroller.js";
 
-const mdrouter=Express.Router();
+const marketrouter=Express.Router();
 //http://localhost:3000/addnews
-mdrouter.post('/addcrop',addcrops)
-mdrouter.get("/crop-data/:cropName",getcrops)
-export default mdrouter;
+marketrouter.post('/addcrops',addcrops)
+marketrouter.get("/getcrop",getcrops)
+marketrouter.delete("/deletecrop",deleteCrop)
+marketrouter.put("/updatemarketdata",updateMarketData)
+marketrouter.delete("/deletemarketdata",deleteMarketData)
+export default marketrouter;

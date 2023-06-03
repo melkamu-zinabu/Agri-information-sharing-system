@@ -4,4 +4,4 @@ const cropSchema = new mongoose.Schema({
   name: { type: String, required: true },
 });
 
-export default mongoose.model('Crop', cropSchema);
+export default mongoose.model('cropmodel', cropSchema);

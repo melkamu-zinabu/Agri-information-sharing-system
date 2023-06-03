@@ -15,14 +15,31 @@ import mongoose from "mongoose";
         type: String,
         required: true
       },
+    role: {
+        type: String,
+        default: "farmer",
+      },
+    date: {
+        type: Date, 
+        default: Date.now 
+      },
     tokens:[{
       token:{
         type:String,
-        required: true
+        
       }
     }],
+    // resetToken: This field is specifically used for the password reset functionality
+    resetToken: {
+      type: String,
+    },
+    // This field represents the expiration time for the resetToken.
     resetTokenExpiration: {
       type: Date,
+    },
+    image: {
+      data: Buffer,
+      contentType: String,
     },
 });
     

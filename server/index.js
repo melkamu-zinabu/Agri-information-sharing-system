@@ -5,11 +5,12 @@ import dotenv from 'dotenv'
 import  CONNECTDB  from "./config/db.js"
 //import {imageroute } from './routes/imageroute.js'
 import cors from "cors"
-import router from "./route/neewsfeedroute.js";
-import mdrouter from "./route/marketdata.js";
 import jobrouter from "./route/jobroute.js";
+import userrouter from "./route/userroute.js";
+import productrouter from "./route/productroute.js";
+import newsrouter from "./route/newsroute.js";
+import marketrouter from "./route/marketdata.js";
 dotenv.config();
-
 
 const app=express();
 app.use(express.json());
@@ -23,9 +24,11 @@ CONNECTDB();
 const port=3000;
 
 
-app.use('/',router)
-app.use('/marketdata',mdrouter)
+app.use('/user',userrouter)
 app.use('/jobs',jobrouter)
+app.use('/product',productrouter)
+app.use('/news',newsrouter)
+app.use('/market',marketrouter)
 
 app.listen(port,MEL);
 
