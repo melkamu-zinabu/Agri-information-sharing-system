@@ -17,11 +17,11 @@ app.use(express.json());
 
 // we are telling this application will use only json to communicate
 app.use(cors({
-   origin: 'http://localhost:3001', // specify the URL of the client that can make requests
+   origin: 'http://localhost:3000', // specify the URL of the client that can make requests
    methods: ['GET', 'POST','DELETE','PUT'], // specify the methods that are allowed
  }));
 CONNECTDB();
-const port=3000;
+const port=3005;
 
 
 app.use('/user',userrouter)

@@ -8,9 +8,9 @@ dotev.config()
 //login secretkey..
 //to register user
 
-  export const register= async (req, res) => {
-  try { 
-    const { name, email, password,confirmPassword,role} = req.body;
+export const register = async (req, res) => {
+  try {
+    const { name, email, password, confirmPassword, role } = req.body;
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     // Check if a user with the same email already exists
     const existingUser = await usermodel.findOne({ email });
@@ -37,7 +37,6 @@ dotev.config()
       return res.status(400).json({ success: false, message: 'Passwords do not match' });
     }
 
-    
     // Check if role is empty
     if (!role) {
       return res.status(400).json({ success: false, message: 'Role is required' });
@@ -47,31 +46,41 @@ dotev.config()
     if (!name) {
       return res.status(400).json({ success: false, message: 'Name is required' });
     }
-
-
+    
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
-    
-    // Create a new user instance
-    const user = new usermodel({
-      name,
-      email,
-      password: hashedPassword,
-      role,
-      image: {
-        data: fs.readFileSync("uploads/" + req.file.filename),
-        contentType: req.file.mimetype,
-      },
-    });
-    console.log(email);
+
+
+    let user;
+    if (req.file) {
+      // If file is provided, save image data to the user
+      user = new usermodel({
+        name,
+        email,
+        password: hashedPassword,
+        role,
+        image: {
+          data: fs.readFileSync("uploads/" + req.file.filename),
+          contentType: req.file.mimetype,
+        },
+      });
+    } else {
+      // If file is not provided, save user without the image field
+      user = new usermodel({
+        name,
+        email,
+        password: hashedPassword,
+        role,
+      });
+    }
 
     // Save the user to the database
     await user.save();
 
     res.status(201).json({ success: true, message: 'User registered successfully' });
   } catch (error) {
-    console.log(error)
-    res.status(500).json({ success: false, message: {error} });
+    console.log(error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -328,8 +337,10 @@ dotev.config()
   
 
  
- export const login = async (req, res) => {
-  const { email, password,rememberMe} = req.body; 
+ 
+  export const login = async (req, res) => {
+    const { email, password, rememberMe } = req.body;
+  
     // Validate the request parameters
     if (!password || !email) {
       return res.status(400).json({ success: false, message: "Please provide the email and password." });
@@ -339,34 +350,43 @@ dotev.config()
       // Find the user based on the provided email
       const user = await usermodel.findOne({ email });
       if (!user) {
-        return res.status(404).json({ success: false, msg: "Invalid credentials." });
+        return res.status(404).json({ success: false, message: "Invalid credentials." });
       }
   
       // Compare the provided password with the stored password hash
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        return res.status(401).json({ success: false, msg: "Incorrect password." });
+        return res.status(401).json({ success: false, message: "Incorrect password." });
       }
   
-
+      // Construct the saved data object
+      const savedData = {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        // Include other properties you want to return...
+      };
+  
       // Generate a JWT token with the user ID as the payload
-      //const token=null
-      if(rememberMe)
-      { const token = Jwt.sign({ userId: user._id },process.env.secret_key, { expiresIn: '1h' });
-       // Save the token to the user's tokens array
-      user.tokens.push({ token });
-
-     // Save the updated user document
+      let token = null;
+      if (rememberMe) {
+        token = Jwt.sign({ userId: user._id }, process.env.secret_key, { expiresIn: '1h' });
+        // Save the token to the user's tokens array
+        user.tokens.push({ token });
+      }
+  
+      // Save the updated user document
       await user.save();
-      res.status(201).json({ success: true, token, message: "Logged in successfully." });
-    }
-
-      res.status(201).json({ success: true, message: "Logged in successfully." });
+  
+      // Return the token and saved data in the response
+      res.status(201).json({ success: true, token, data: savedData, message: "Logged in successfully." });
     } catch (error) {
       console.error(error);
       res.status(500).json({ success: false, message: "An error occurred while logging in." });
     }
   };
+  
   //login frontend
 //   import React, { useState } from 'react';
 // import { useHistory } from 'react-router-dom';
