@@ -1,5 +1,5 @@
 import Express  from "express";
-import {changePassword, getAllUsers, getUserById, login, logout, register, removeAccount, updateAccount, updateUserRole} from "../controller/usercontroller.js";
+import {changePassword, getAllUsers, getUserById, login, logout, register, removeAccount, resetpassword, resetwithemail, updateAccount, updateUserRole} from "../controller/usercontroller.js";
 import { authenticate } from "../middleware/authenticate.js";
 import { upload } from "../controller/uploads.js";
 const userrouter=Express.Router();
@@ -10,6 +10,8 @@ userrouter.delete('/removeuser/:id',authenticate,removeAccount)
 userrouter.post('/updateuser/:id',upload.single('image'),updateAccount)
 userrouter.post('/login',login)
 userrouter.post('/changepassword',authenticate,changePassword)
-userrouter.post('/updateuserole',authenticate,updateUserRole)
+userrouter.post('/resetpwbyemail',resetwithemail)
+userrouter.post('/passwordresetpage',resetpassword)
+userrouter.post('/updateuserole',updateUserRole)
 userrouter.post('/api/logout', authenticate,logout)
 export default userrouter;

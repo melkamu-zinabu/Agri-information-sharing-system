@@ -4,6 +4,10 @@ import  Jwt  from 'jsonwebtoken';
 import dotev from 'dotenv';
 import usermodel from '../model/usermodel.js';
 import fs from 'fs'
+import crypto from 'crypto'
+import nodemailer from 'nodemailer'
+import { error } from 'console';
+import sendEmail from './sendEmail.js'
 dotev.config()
 //login secretkey..
 //to register user
@@ -586,62 +590,55 @@ export const register = async (req, res) => {
 // password reset
 // Endpoint to handle sending the reset email
 //app.post('/api/send-reset-email',
- export const sendresetemail = async (req, res) => {
+// Assuming you have the necessary dependencies and configurations already set up
+
+// Route for sending reset email
+export const resetwithemail =  async (req, res) => {
   const { email } = req.body;
-
+  console.log(email)
   try {
-    // Check if the user exists
-    const user = await usermodel.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found.' });
-    }
-
+  const user = await usermodel.findOne({ email });
+  if (!user) {
+        return res.status(404).json({ message: 'User not found.' });
+        console.log(email)
+      }
+  
     // Generate a reset token and expiration
     const resetToken = crypto.randomBytes(32).toString('hex');
     const resetTokenExpiration = Date.now() + 3600000; // Token valid for 1 hour
-
     // Update the user with the reset token and expiration
     user.resetToken = resetToken;
     user.resetTokenExpiration = resetTokenExpiration;
     await user.save();
-
+  //    // Send an email to the user with a link to the reset password page
+  // const requestLink = `http://localhost:3000/reset-password/${token}/${user._id}`;
     // Send the reset email
-    const transporter = nodemailer.createTransport({
-      // Configure your email provider details
-      service: 'gmail',
-      auth: {
-        user: 'zmelkamu918@gmail.com',
-        pass: '123mel123!',
-      },
-    });
-    
 
-    const mailOptions = {
-      from: 'zmelkamu918@gmail.com',
-      to: email,
-      subject: 'Password Reset',
-      text: `Click on the following link to reset your password: http://your-website.com/reset-password?token=${resetToken}`,
-    };
+// send eamil with token
+let subject = 'Password Reset Request';
+ 
+let text = `Hello ${"user.name"},Click on the following link to reset your password: http://localhost:3000/ResetPasswordPage/${resetToken}`;
+await sendEmail( email,subject , text);
+res.json({ message: 'Password reset email sent' });
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
+  
+
+    }
+    catch (error) {
         console.error('Error sending reset email:', error);
-        return res.status(500).json({ message: 'Failed to send reset email.' });
+      //  return res.status(500).json({ message: 'Failed to send reset email.' });
+        return res.status(404).json({ message: 'Failed to send reset email.' });
       }
-      console.log('Reset email sent:', info.response);
-      return res.status(200).json({ message: 'Reset email sent successfully.' });
-    });
-  } catch (error) {
-    console.error('Error sending reset email:', error);
-    return res.status(500).json({ message: 'Failed to send reset email.' });
+
+ 
   }
-};
+
 
 // app.post('/api/reset-password'
 
 export const resetpassword =async (req, res) => {
   const {newPassword } = req.body;
-
+console.log(newPassword)
   try {
     // Find the user by email and valid reset token
     const user = await usermodel.findOne({
@@ -650,6 +647,7 @@ export const resetpassword =async (req, res) => {
     });
 
     if (!user) {
+      
       return res.status(404).json({ message: 'Invalid or expired reset token.' });
     }
 
@@ -668,151 +666,4 @@ export const resetpassword =async (req, res) => {
 
 
   
-
-
-//  font end code
-
-
-// const ResetPassword = () => {
-//   const [email, setEmail] = useState('');
-//   const [emailSent, setEmailSent] = useState(false);
-//   const [resetStatus, setResetStatus] = useState('');
-
-//   const handleSendEmail = async (e) => {
-//     e.preventDefault();
-
-//     try {
-//       // Make an API call to send the reset email
-//       const response = await fetch('/api/send-reset-email', {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-//         body: JSON.stringify({ email }),
-//       });
-
-//       if (response.ok) {
-//         setEmailSent(true);
-//         setResetStatus('Email sent. Please check your inbox for further instructions.');
-//       } else {
-//         const errorData = await response.json();
-//         setResetStatus(errorData.message);
-//       }
-//     } catch (error) {
-//       console.error('Error sending reset email:', error);
-//       setResetStatus('An error occurred. Please try again later.');
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <h1>Reset Password</h1>
-//       {!emailSent ? (
-//         <form onSubmit={handleSendEmail}>
-//           <div>
-//             <label htmlFor="email">Email:</label>
-//             <input
-//               type="email"
-//               id="email"
-//               value={email}
-//               onChange={(e) => setEmail(e.target.value)}
-//               required
-//             />
-//           </div>
-//           <button type="submit">Send Reset Email</button>
-//         </form>
-//       ) : (
-//         <p>{resetStatus}</p>
-//       )}
-//     </div>
-//   );
-// };
-
-
-
-
-// const ResetPasswordPage = () => {
-//   const { token} = useParams();
-//   const [newPassword, setNewPassword] = useState('');
-//   const [resetStatus, setResetStatus] = useState(null);
-//   const history = useHistory();
-
-//   useEffect(() => {
-//     // You can perform any necessary actions here with the token and email values,
-//     // such as pre-filling form fields or validating the token.
-
-//     console.log('Token:', token);
-//     console.log('Email:', email);
-//   }, [token]);
-
-//   const handlePasswordChange = (e) => {
-//     setNewPassword(e.target.value);
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     try {
-//       const response = await axios.post('/api/reset-password', {
-//
-//         newPassword,
-//         resetToken: token,
-//       });
-//       setResetStatus(response.data.message);
-//     } catch (error) {
-//       console.error('Error resetting password:', error);
-//       setResetStatus('Failed to reset password.');
-//     }
-//   };
-
-//   const handleGoBack = () => {
-//     history.push('/login'); // Redirect to the login page after password reset
-//   };
-
-//   return (
-//     <div>
-//       <h1>Reset Password</h1>
-//       {resetStatus ? (
-//         <div>
-//           <p>{resetStatus}</p>
-//           <button onClick={handleGoBack}>Go Back to Login</button>
-//         </div>
-//       ) : (
-//         <form onSubmit={handleSubmit}>
-//           <label>New Password:</label>
-//           <input type="password" value={newPassword} onChange={handlePasswordChange} />
-//           <button type="submit">Reset Password</button>
-//         </form>
-//       )}
-//     </div>
-//   );
-// };
-
-
-//route
-
-// const App = () => {
-//   return (
-//     <Router>
-//       <Switch>
-//         {/* Other routes */}
-//         <Route path="/reset-password/:token" component={ResetPasswordPage} />
-//       </Switch>
-//     </Router>
-//   );
-// };
-
-
-// // api
-// // Define User schema
-// const userSchema = new mongoose.Schema({
-//   email: { type: String, required: true },
-//   password: { type: String, required: true },
-//   resetToken: String,
-//   resetTokenExpiration: Date,
-// });
-
-
-
-// // Endpoint to handle resetting the password
-
 
