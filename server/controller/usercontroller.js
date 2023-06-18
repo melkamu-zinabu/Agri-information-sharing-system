@@ -209,38 +209,25 @@ export const register = async (req, res) => {
     //     setJobs(receivedJobs);
   
   };
-  // to view user his/her own profile
-  export const getUserById = async (req, res) => {
- 
-    const userId = req.user._id; // Retrieve the user ID from req.user assumming you are using authenticate middleware
 
-  
-    try {
-      const user = await usermodel.findById(userId).select("-password");
-  
-      if (!user) {
-        return res.status(404).json({ success: false, message: "User not found" });
-      }
-  
-      res.status(200).json({ success: true, user, message: "User found" });
-    } catch (error) {
-      console.error(error);
-      res
-        .status(500)
-        .json({ success: false, message: "An error occurred while fetching the user" });
+  // Backend: getUserById
+export const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params
+    // const user = await usermodel.findOne({ email });
+    const user = await usermodel.findById({_id: id}).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
     }
+    console.log(user.name)
 
-        //in front end
-    // fetch('/api/jobs') // Replace with the actual API endpoint URL
-    //   .then(response => response.json())
-    //   .then(data => {
-    //     // Access the jobs array from the JSON response
-    //     const receivedJobs = data.jobs;
-
-    //     // Update the state with the received jobs
-    //     setJobs(receivedJobs);
-  
-  };
+    res.status(200).json({ success: true, userdata:user, message: "User found" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "An error occurred while fetching the user" });
+  }
+};
   
   export const removeAccount = async (req, res) => {
     try {
@@ -343,8 +330,8 @@ export const register = async (req, res) => {
  
  
   export const login = async (req, res) => {
-    const { email, password, rememberMe } = req.body;
-  
+    const { email, password } = req.body;
+ 
     // Validate the request parameters
     if (!password || !email) {
       return res.status(400).json({ success: false, message: "Please provide the email and password." });
@@ -362,29 +349,27 @@ export const register = async (req, res) => {
       if (!isMatch) {
         return res.status(401).json({ success: false, message: "Incorrect password." });
       }
-  
+    
       // Construct the saved data object
-      const savedData = {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
+     
+       
+      
+    
         // Include other properties you want to return...
-      };
+     
   
       // Generate a JWT token with the user ID as the payload
-      let token = null;
-      if (rememberMe) {
-        token = Jwt.sign({ userId: user._id }, process.env.secret_key, { expiresIn: '1h' });
+      let token= Jwt.sign({ userId: user._id }, process.env.secret_key, { expiresIn: '1h' });
         // Save the token to the user's tokens array
         user.tokens.push({ token });
-      }
-  
+      
       // Save the updated user document
       await user.save();
-  
+
+      res.status(201).json({user, token})
+      console.log('1')
       // Return the token and saved data in the response
-      res.status(201).json({ success: true, token, data: savedData, message: "Logged in successfully." });
+      //res.status(201).json({ success: true, token, data: savedData, message: "Logged in successfully." });
     } catch (error) {
       console.error(error);
       res.status(500).json({ success: false, message: "An error occurred while logging in." });

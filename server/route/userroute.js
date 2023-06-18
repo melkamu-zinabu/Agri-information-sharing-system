@@ -5,7 +5,7 @@ import { upload } from "../controller/uploads.js";
 const userrouter=Express.Router();
 userrouter.post('/register',upload.single('image'),register)
 userrouter.get('/getallusers',getAllUsers)
-userrouter.get('/getuserbyid',authenticate,getUserById)
+userrouter.get('/getuserbyid/:id',getUserById)
 userrouter.delete('/removeuser/:id',authenticate,removeAccount)
 userrouter.post('/updateuser/:id',upload.single('image'),updateAccount)
 userrouter.post('/login',login)
