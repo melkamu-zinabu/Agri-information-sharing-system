@@ -210,6 +210,7 @@ export const register = async (req, res) => {
   
   };
 
+
   // Backend: getUserById
 export const getUserById = async (req, res) => {
   try {
@@ -221,8 +222,16 @@ export const getUserById = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
     console.log(user.name)
-
-    res.status(200).json({ success: true, userdata:user, message: "User found" });
+   const { name, email } = user;
+   res.json({
+    name,
+    email,
+    image: {
+      contentType: user.image.contentType,
+      data: user.image.data.toString('base64'),
+    },
+  });
+    // res.status(200).json({ user });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "An error occurred while fetching the user" });
@@ -365,8 +374,8 @@ export const getUserById = async (req, res) => {
       
       // Save the updated user document
       await user.save();
-
-      res.status(201).json({user, token})
+      res.status(201).json(user)
+      // res.status(201).json({user, token})
       console.log('1')
       // Return the token and saved data in the response
       //res.status(201).json({ success: true, token, data: savedData, message: "Logged in successfully." });
