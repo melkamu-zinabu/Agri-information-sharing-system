@@ -172,44 +172,42 @@ export const register = async (req, res) => {
     // export default RegistrationForm;
     
     
-  export const getAllUsers = async (req, res) => {
-    try {
-      const page = Number(req.query.page) || 1;
-      const limit = Number(req.query.limit) || 10;
-      const skip = (page - 1) * limit;
-  
-      const users = await usermodel.find({})
-        .select("-password")
-        .skip(skip)
-        .limit(limit);
-  //exclude users pw
-      const count = await usermodel.countDocuments({});
-  
-      res.status(200).json({
-        success: true,
-        users,
-        count,
-        message: "List of users",
-      });
-    } catch (error) {
-      console.error(error);
-      res
-        .status(500)
-        .json({ success: false, message: "An error occurred while fetching the users." });
-    }
-
-        //in front end
-    // fetch('/api/jobs') // Replace with the actual API endpoint URL
-    //   .then(response => response.json())
-    //   .then(data => {
-    //     // Access the jobs array from the JSON response
-    //     const receivedJobs = data.jobs;
-
-    //     // Update the state with the received jobs
-    //     setJobs(receivedJobs);
-  
-  };
-
+    export const getAllUsers = async (req, res) => {
+      try {
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+    
+        const farmers = await usermodel
+          .find({ role: "Farmer" })
+          .select("-password")
+          .skip(skip)
+          .limit(limit);
+    
+        const count = await usermodel.countDocuments({ role: "Farmer" });
+    
+        const profileData = farmers.map((farmer) => {
+          return {
+            _id: farmer._id,
+            name: farmer.name,
+            email: farmer.email,
+            image: farmer.image,
+          };
+        });
+    
+        res.status(200).json({
+          profileData,
+          count,
+          message: "List of farmers",
+        });
+      } catch (error) {
+        console.error(error);
+        res
+          .status(500)
+          .json({ success: false, message: "An error occurred while fetching the farmers." });
+      }
+    };
+    
 
   // Backend: getUserById
 export const getUserById = async (req, res) => {
