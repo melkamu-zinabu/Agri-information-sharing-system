@@ -191,12 +191,15 @@ export const register = async (req, res) => {
             _id: farmer._id,
             name: farmer.name,
             email: farmer.email,
-            image: farmer.image,
+            image: {
+              contentType: farmer.image.contentType,
+              data: farmer.image.data.toString('base64'),
+            },
           };
         });
     
         res.status(200).json({
-          profileData,
+          data: profileData,
           count,
           message: "List of farmers",
         });
@@ -240,13 +243,13 @@ export const getUserById = async (req, res) => {
     try {
       const { id: userId } = req.params;
   
-      // Check if the authenticated user is authorized to delete the account pass authenticate middleware
-      if (req.user.role !== "admin" && req.user._id !== userId) {
-        return res.status(403).json({
-          success: false,
-          message: "You are not authorized to delete this account.",
-        });
-      }
+      // // Check if the authenticated user is authorized to delete the account pass authenticate middleware
+      // if (req.user.role !== "admin" &&!== userId) {
+      //   return res.status(403).json({
+      //     success: false,
+      //     message: "You are not authorized to delete this account.",
+      //   });
+      // }
   
       const user = await usermodel.findOneAndRemove({ _id: userId });
   
