@@ -10,6 +10,7 @@ import userrouter from "./route/userroute.js";
 import productrouter from "./route/productroute.js";
 import newsrouter from "./route/newsroute.js";
 import marketrouter from "./route/marketdata.js";
+import contactrouter from "./route/contactroute.js";
 dotenv.config();
 
 const app=express();
@@ -29,6 +30,7 @@ app.use('/jobs',jobrouter)
 app.use('/product',productrouter)
 app.use('/news',newsrouter)
 app.use('/market',marketrouter)
+app.use('/contact',contactrouter)
 
 app.listen(port,MEL);
 

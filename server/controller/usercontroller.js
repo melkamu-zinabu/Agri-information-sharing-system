@@ -611,9 +611,9 @@ export const resetwithemail =  async (req, res) => {
 // send eamil with token
 let subject = 'Password Reset Request';
  
-let text = `Hello ${"user.name"},Click on the following link to reset your password: http://localhost:3000/ResetPasswordPage/${resetToken}`;
+let text = `Hello ${user.name},Click on the following link to reset your password: http://localhost:3000/ResetPasswordPage/${resetToken}`;
 await sendEmail( email,subject , text);
-res.json({ message: 'Password reset email sent' });
+res.status(200).json({ message: ' Password reset link sent Successfully to your email.               Visit your EMail' });
 
   
 
@@ -631,9 +631,24 @@ res.json({ message: 'Password reset email sent' });
 // app.post('/api/reset-password'
 
 export const resetpassword =async (req, res) => {
-  const {newPassword } = req.body;
+  const {newPassword, confirmPassword} = req.body;
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
 console.log(newPassword)
   try {
+      // Validate password format
+    if (!passwordRegex.test(newPassword)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          'Password must contain at least 8 characters, including at least one uppercase letter, one lowercase letter, one digit, and one special character',
+      });
+    }
+    
+    // Check if password and confirm password match
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ success: false, message: 'Passwords do not match' });
+    }
     // Find the user by email and valid reset token
     const user = await usermodel.findOne({
       resetToken: req.body.resetToken,
@@ -641,16 +656,17 @@ console.log(newPassword)
     });
 
     if (!user) {
-      
-      return res.status(404).json({ message: 'Invalid or expired reset token.' });
+      console.log("1")
+      return res.status(404).json({ message: 'Invalid or expired  reset token.' });
     }
-
+     // Hash the password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
     // Update the user's password
-    user.password = newPassword;
+    user.password = hashedPassword;
     user.resetToken = null;
     user.resetTokenExpiration = null;
     await user.save();
-
+    console.log("2")
     return res.status(200).json({ message: 'Password reset successful.' });
   } catch (error) {
     console.error('Error resetting password:', error);
