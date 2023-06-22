@@ -8,10 +8,7 @@ const jobSchema = new mongoose.Schema({
   company: String,
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'usermodel' }, // Reference to the User model
   date: { type: Date, default: Date.now } ,// Date field with default value of current date
-  image: {
-    data: Buffer,
-    contentType: String
-  }
+
 });
 
     

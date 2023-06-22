@@ -41,6 +41,14 @@ import mongoose from "mongoose";
       data: Buffer,
       contentType: String,
     },
+    phone: {
+      type: String,
+      default: ''
+    },
+    chatlink: {
+      type: String,
+      default: ''
+    },
 });
     
 export default mongoose.model('usermodel', usermodel);

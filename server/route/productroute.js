@@ -4,9 +4,9 @@ import { addproduct, deleteproduct, getproduct, getproductbyuserid, updateproduc
 import { authenticate } from "../middleware/authenticate.js";
 const productrouter=Express.Router();
 //http://localhost:3000/addnews
-productrouter.post('/addproduct',authenticate,upload.single('image'),addproduct)
-productrouter.get("/getproductbyuserid/",authenticate,getproductbyuserid)
+productrouter.post('/addproduct',upload.single('image'),addproduct)
+productrouter.get("/getproductbyuserid/",getproductbyuserid)
 productrouter.get('/getproducts',authenticate,getproduct)
 productrouter.put('/updateproduct/:id',authenticate,upload.single('image'),updateproduct)
-productrouter.delete('/deleteproduct/:id',authenticate,deleteproduct)
+productrouter.delete('/deleteproduct/:id',deleteproduct)
 export default productrouter;

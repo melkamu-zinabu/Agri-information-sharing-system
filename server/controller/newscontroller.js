@@ -3,8 +3,17 @@ import newsmodel from '../model/newsmodel.js';
 
 // Add a new News record:
 export const addnews = async (req, res, next) => {
-  const { category, title, description } = req.body;
-  const userId = req.user._id; // Assuming your authentication middleware attaches the user ID to req.user._id
+  console.log(req.body)
+  const { category, title,id, description } = req.body;
+  // Assuming your authentication middleware attaches the user ID to req.user._id
+  if (!category || !title || !id || !description) {
+    return res.status(400).json({ success: false, message: 'Value is required' });
+  }
+  if(!req.file){
+    return res.status(400).json({ success: false, message: 'Value is required' });
+
+  }
+  
 
   try {
     const news = new newsmodel({
@@ -15,7 +24,7 @@ export const addnews = async (req, res, next) => {
         data: fs.readFileSync("uploads/" + req.file.filename),
         contentType: req.file.mimetype,
       },
-      user: userId, // Add the user ID to the news article
+      user: id, // Add the user ID to the news article
     });
 
     const savedNews = await news.save();
@@ -31,71 +40,106 @@ export const addnews = async (req, res, next) => {
 // Retrieve all News records:
 export const getnews = async (req, res, next) => {
   try {
-    const search = req.query.search || "";
-    const filter = req.query.filter || ""; // by category
-    const startDate = req.query.startDate || "";
-    const endDate = req.query.endDate || "";
-
-    // Construct the query object
-    const query = {};
-    if (search) {
-      query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-      ];
-    }
-    if (filter) {
-      query.category = filter;
-    }
-    if (startDate && endDate) {
-      query.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
-    } else if (startDate) {
-      query.date = { $gte: new Date(startDate) };
-    } else if (endDate) {
-      query.date = { $lte: new Date(endDate) };
-    }
-
-    const news = await newsmodel.find(query);
-    res.status(200).json({ message: 'News retrieved successfully', news });
+   
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = parseInt(req.query.limit) || 10;
+  const startIndex = (page - 1) * pageSize;
+  //const endIndex = startIndex + pageSize;
+  const search = req.query.search || "";
+  const filter = req.query.filter || ""; // by category
+  
+  const searchOptions = {
+    $or: [
+      { title: { $regex: search, $options: 'i' } },
+      { description: { $regex: search, $options: 'i' } },
+      { category: { $regex: search, $options: 'i' } },
+    ],
+  
+  };
+  
+  if (filter) {
+    searchOptions.category = filter;
+  }
+  
+const count = await newsmodel.countDocuments(searchOptions);
+const newfeed = await newsmodel.find(searchOptions)
+.sort({ date: -1 }) // Sort by date field in descending order (-1)
+.skip(startIndex)
+.limit(pageSize)
+.exec();
+const NData = newfeed.map((farmer) => {
+  return {
+    _id: farmer._id,
+    title: farmer.title,
+    category: farmer.category,
+    description: farmer.description,
+    image: {
+      contentType: farmer.image.contentType,
+      data: farmer.image.data.toString('base64'),
+      
+    },
+  };
+});
+    res.status(200).json({ message: 'News retrieved successfully', data: NData, count});
+    console.log(NData)
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server Error' });
     // Call the error handling middleware
     next(err);
   }
-};
+
+   
+}; 
 
 // Retrieve News records by user ID:
 export const getnewsbyuserid = async (req, res, next) => {
-  const userId = req.user._id; // Assuming your authentication middleware attaches the user ID to req.user._id
-
   try {
-    const search = req.query.search || "";
-    const filter = req.query.filter || ""; // by category
-    const startDate = req.query.startDate || "";
-    const endDate = req.query.endDate || "";
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = parseInt(req.query.limit) || 10;
+  const startIndex = (page - 1) * pageSize;
+  //const endIndex = startIndex + pageSize;
+  const search = req.query.search || "";
+  const filter = req.query.filter || ""; // by category
+  const userId = req.query.id;// Assuming your authentication middleware attaches the user ID to req.user._id
+  
 
-    // Construct the query object
-    const query = { user: userId };
-    if (search) {
-      query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-      ];
-    }
-    if (filter) {
-      query.category = filter;
-    }
-    if (startDate && endDate) {
-      query.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
-    } else if (startDate) {
-      query.date = { $gte: new Date(startDate) };
-    } else if (endDate) {
-      query.date = { $lte: new Date(endDate) };
-    }
+  const searchOptions = {
+    $or: [
+      { title: { $regex: search, $options: 'i' } },
+      { description: { $regex: search, $options: 'i' } },
+      { category: { $regex: search, $options: 'i' } },
+    ],
+    user: userId,
+  };
+  
+  if (filter) {
+    searchOptions.category = filter;
+  }
+  
+const count = await newsmodel.countDocuments(searchOptions);
+const newfeed = await newsmodel.find(searchOptions)
+.sort({ date: -1 }) // Sort by date field in descending order (-1)
+.skip(startIndex)
+.limit(pageSize)
+.exec();
+const NData = newfeed.map((farmer) => {
+  return {
+    _id: farmer._id,
+    title: farmer.title,
+    category: farmer.category,
+    description: farmer.description,
+    image: {
+      contentType: farmer.image.contentType,
+      data: farmer.image.data.toString('base64'),
+      
+    },
+  };
+});
 
-    const news = await newsmodel.find(query);
-    res.status(200).json({ message: 'News retrieved successfully', news });
+
+    res.status(200).json({ message: 'News retrieved successfully', data: NData, count});
+    console.log(NData)
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server Error' });

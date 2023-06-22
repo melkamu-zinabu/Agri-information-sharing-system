@@ -2,26 +2,25 @@ import jobmodel from '../model/jobmodel.js'
 // Create a Job API
 export const addJob = async (req, res) => {
   try {
-    const userId = req.user._id; // Retrieve the user ID from req.user
-    
+    const { title, description, company, location, id } = req.body;
+console.log(req.body)
+    if (!company || !title || !id || !description|| !location) {
+      return res.status(400).json({ success: false, message: 'Value is required' });
+    }
     const job = new jobmodel({
-      title: req.body.title,
-      description: req.body.description,
-      location: req.body.location,
-      company: req.body.company,
-      user: userId, // Assign the user ID as the reference to the associated user
-      date: new Date(), // Set the date field to the current date and time
-      image: {
-        data: await fs.promises.readFile("uploads/" + req.file.filename), // Read image file asynchronously
-        contentType: req.file.mimetype,
-      },
+      title,
+      description,
+      company,
+      location,
+      user: id,// Set the date field to the current date and time
     });
+console.log(job)
 
     const savedJob = await job.save();
     res.status(201).json({ message: 'Job created successfully', job: savedJob });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to create job' });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -32,13 +31,8 @@ export const getjobsbyuserid = async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.limit) || 10;
     const startIndex = (page - 1) * pageSize;
-   // const endIndex = startIndex + pageSize;
     const searchQuery = req.query.search || '';
-    const userId = req.user.id;
-     // Assuming you are using an authentication middleware or 
-    //function that populates the req.user object with the authenticated user's information, 
-    //you can access the user's ID through req.user._id. you can pass these middleware in route folder
-   
+    const userId = req.query.id;
 
     const searchOptions = {
       $or: [
@@ -50,28 +44,25 @@ export const getjobsbyuserid = async (req, res, next) => {
       user: userId,
     };
 
-    const totalItems = await jobmodel.countDocuments(searchOptions);
-    const jobs = await jobmodel.find(searchOptions)
-    .sort({ date: -1 }) // Sort by date field in descending order (-1)
-    .skip(startIndex)
-    .limit(pageSize)
-    .exec();
+    const count = await jobmodel.countDocuments(searchOptions);
+    
+    const jobs = await jobmodel
+      .find(searchOptions)
+      .sort({ date: -1 }) // Sort by date field in descending order (-1)
+      .skip(startIndex)
+      .limit(pageSize);
 
-    res.status(200).json({ message: 'Jobs retrieved successfully', jobs, totalItems });
+    console.log(jobs);
+    console.log(`searchQuery: ${userId}`);
+    console.log(`page: ${page}`);
+
+    res.status(200).json({ message: 'Jobs retrieved successfully', jobs, count });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to retrieve jobs' });
-     //in front end
-    // fetch('/api/jobs') // Replace with the actual API endpoint URL
-    //   .then(response => response.json())
-    //   .then(data => {
-    //     // Access the jobs array from the JSON response
-    //     const receivedJobs = data.jobs;
-
-    //     // Update the state with the received jobs
-    //     setJobs(receivedJobs);
+    res.status(500).json({ success: false, message: "An error occurred while fetching the jobs." });
   }
 };
+
 
 
 //get all jobs
@@ -159,19 +150,23 @@ export const updatejobs = async (req, res, next) => {
 
 
 export const deletejobs = async (req, res, next) => {
-  const id = req.params.id;
+  try {
+  const { id: userId } = req.params;
 
-  jobmodel.findByIdAndRemove(id, (err, deletedJob) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to delete job' });
-    }
+  const job = await jobmodel.findOneAndRemove({ _id: userId });
+  
+  if (!job) {
+    return res.status(404).json({
+      success: false,
+      message: `No job with id: ${userId} found.`,
+    });
+  }
 
-    if (!deletedJob) {
-      return res.status(404).json({ error: 'Job not found' });
-    }
-
-    res.json({ message: 'Job deleted successfully' });
-  });
+  res.status(200).json({ success: true, message: "job deleted successfully." });
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ success: false, message: "An error occurred while deleting the job." });
+}
 };
 
 

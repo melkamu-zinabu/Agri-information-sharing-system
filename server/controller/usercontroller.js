@@ -8,13 +8,14 @@ import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 import { error } from 'console';
 import sendEmail from './sendEmail.js'
+import { types } from 'util';
 dotev.config()
 //login secretkey..
 //to register user
 
 export const register = async (req, res) => {
   try {
-    const { name, email, password, confirmPassword, role } = req.body;
+    const { name, email, password, confirmPassword, role,chatlink,phone } = req.body;
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     // Check if a user with the same email already exists
     const existingUser = await usermodel.findOne({ email });
@@ -63,6 +64,8 @@ export const register = async (req, res) => {
         email,
         password: hashedPassword,
         role,
+        phone,
+        chatlink,
         image: {
           data: fs.readFileSync("uploads/" + req.file.filename),
           contentType: req.file.mimetype,
@@ -81,7 +84,9 @@ export const register = async (req, res) => {
     // Save the user to the database
     await user.save();
 
-    res.status(201).json({ success: true, message: 'User registered successfully' });
+    res.status(201).json(user);
+    console.log(user)
+
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: error.message });
@@ -177,15 +182,21 @@ export const register = async (req, res) => {
         const page = Number(req.query.page) || 1;
         const limit = Number(req.query.limit) || 10;
         const skip = (page - 1) * limit;
-    
+        const roles = req.query.role;
+      if(!roles){
+        console.log(roles)
+
+      }
+ console.log(roles)
         const farmers = await usermodel
-          .find({ role: "Farmer" })
+          .find({ role: roles })
           .select("-password")
           .skip(skip)
           .limit(limit);
+         
     
-        const count = await usermodel.countDocuments({ role: "Farmer" });
-    
+        const count = await usermodel.countDocuments({ role:roles });
+    console.log(`vvvvvvvvv+${count}`)
         const profileData = farmers.map((farmer) => {
           return {
             _id: farmer._id,
@@ -193,7 +204,9 @@ export const register = async (req, res) => {
             email: farmer.email,
             image: {
               contentType: farmer.image.contentType,
+            
               data: farmer.image.data.toString('base64'),
+              
             },
           };
         });

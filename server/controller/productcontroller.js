@@ -1,28 +1,40 @@
 import productmodel from '../model/productmodel.js'
+import fs from 'fs'
 // Create a Job API
 export const addproduct = async (req, res) => {
   try {
-    const userId = req.user._id; // Retrieve the user ID from req.user
+    const { name, description, price, id,quantity, category } = req.body; // Retrieve the user ID from req.user
      // Assuming you are using an authentication middleware or 
     //function that populates the req.user object with the authenticated user's information, 
     //you can access the user's ID through req.user._id. you can pass these middleware in route folder
-  
-    const product = new productmodel({
-        name: req.body.name,
-        description: req.body.description,
-        price: req.body.price,
-        quantity: req.body.quantity,
-        category: req.body.category,
-        user: userId, // Associate the job with the user
-        date: new Date(), // Set the date field to the current date and time
+    if (!name || !description || !id || !price||!quantity||!category) {
+      return res.status(400).json({ success: false, message: 'Value is required' });
+    }
+    if (req.file){
+
+      const product = new productmodel({
+        name,
+        description,
+        quantity,
+        price,
+        description,
+        category,
+        user: id,
         image: {
           data: await fs.promises.readFile("uploads/" + req.file.filename), // Read image file asynchronously
           contentType: req.file.mimetype,
         },
-    });
+        // Set the date field to the current date and time
+      });
 
     const savedproduct = await product.save();
     res.status(201).json({ message: ' created successfully', product: savedproduct});
+    }
+    else{
+      return res.status(400).json({ success: false, message: 'image is required' });
+  
+    }
+  
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to create ' });
@@ -36,33 +48,50 @@ export const getproductbyuserid = async (req, res, next) => {
     const pageSize = parseInt(req.query.limit) || 10;
     const startIndex = (page - 1) * pageSize;
     //const endIndex = startIndex + pageSize;
-
     const searchQuery = req.query.search || '';
-    const userId = req.user.id;
+    const userId = req.query.id;
+
      // Assuming you are using an authentication middleware or 
     //function that populates the req.user object with the authenticated user's information, 
     //you can access the user's ID through req.user._id. you can pass these middleware in route folder
-   
-
     const searchOptions = {
       $or: [
         { name: { $regex: searchQuery, $options: 'i' } },
         { description: { $regex: searchQuery, $options: 'i' } },
         { category: { $regex: searchQuery, $options: 'i' } },
-        { price: { $regex: searchQuery, $options: 'i' } },
+        
       ],
       user: userId,
     };
 
-    const totalItems = await productmodel.countDocuments(searchOptions);
+    const count = await productmodel.countDocuments(searchOptions);
 
-    const product = await productmodel.find(searchOptions)
+    const products = await productmodel.find(searchOptions)
     .sort({ date: -1 }) // Sort by date field in descending order (-1)
     .skip(startIndex)
     .limit(pageSize)
     .exec();
+    const profileData = products.map((farmer) => {
+      return {
+        _id: farmer._id,
+        name: farmer.name,
+        category: farmer.category,
+        quantity: farmer.quantity,
+        price: farmer.price,
+        description: farmer.description,
+        image: {
+          contentType: farmer.image.contentType,
+        
+          data: farmer.image.data.toString('base64'),
+          
+        },
+      };
+    });
 
-    res.status(200).json({ message: ' retrieved successfully', product, totalItems });
+    res.status(200).json({ 
+         data: profileData,
+          count,
+          message: "List of farmers",});
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to retrieve ' });
@@ -142,19 +171,22 @@ export const updateproduct = async (req, res, next) => {
 
 
 export const deleteproduct = async (req, res, next) => {
-  const id = req.params.id;
+  try {
+  const { id: userId } = req.params;
+  const product = await productmodel.findOneAndRemove({ _id: userId });
+  
+  if (!product) {
+    return res.status(404).json({
+      success: false,
+      message: `No product with id: ${userId} found.`,
+    });
+  }
 
-  productmodel.findByIdAndRemove(id, (err, deletedproduct) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to delete product' });
-    }
-
-    if (!deletedproduct) {
-      return res.status(404).json({ error: 'product not found' });
-    }
-
-    res.json({ message: 'product deleted successfully' });
-  });
+  res.status(200).json({ success: true, message: "product deleted successfully." });
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ success: false, message: "An error occurred while deleting the product." });
+}
 };
 
 
