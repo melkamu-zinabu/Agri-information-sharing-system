@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 // Job model schema
 const contactSchema = new mongoose.Schema({
     phoneNumber: {
-        type: String,
+        type: Number,
         required: true,
       },
 });

@@ -6,6 +6,7 @@ import contactmodel from "../model/contactmodel.js";
   export const registerphone = async (req, res) => {
     try {
         const { phoneNumber } = req.body;
+
         const newPhoneNumber = new contactmodel({ phoneNumber });
         const savedPhoneNumber = await newPhoneNumber.save();
         console.log(newPhoneNumber)
