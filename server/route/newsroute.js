@@ -7,6 +7,6 @@ const newsrouter=Express.Router();
 newsrouter.post('/addnews',upload.single('image'),addnews)
 newsrouter.get('/getnews',getnews)
 newsrouter.get('/getnewsbyuserid',getnewsbyuserid)
-newsrouter.put('/updatenews',authenticate,upload.single('image'),updatenews)
+newsrouter.put(`/updatenews/:id`,upload.single('image'),updatenews)
 newsrouter.delete(`/deletenews/:id`,deletenews)
 export default newsrouter;

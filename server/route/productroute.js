@@ -6,7 +6,7 @@ const productrouter=Express.Router();
 //http://localhost:3000/addnews
 productrouter.post('/addproduct',upload.single('image'),addproduct)
 productrouter.get("/getproductbyuserid/",getproductbyuserid)
-productrouter.get('/getproducts',authenticate,getproduct)
-productrouter.put('/updateproduct/:id',authenticate,upload.single('image'),updateproduct)
+productrouter.get('/getproducts',getproduct)
+productrouter.put('/updateproduct/:id',upload.single('image'),updateproduct)
 productrouter.delete('/deleteproduct/:id',deleteproduct)
 export default productrouter;

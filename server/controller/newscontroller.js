@@ -10,7 +10,7 @@ export const addnews = async (req, res, next) => {
     return res.status(400).json({ success: false, message: 'Value is required' });
   }
   if(!req.file){
-    return res.status(400).json({ success: false, message: 'Value is required' });
+    return res.status(400).json({ success: false, message: 'image is required' });
 
   }
   
@@ -73,6 +73,7 @@ const NData = newfeed.map((farmer) => {
     title: farmer.title,
     category: farmer.category,
     description: farmer.description,
+    date:farmer.date,
     image: {
       contentType: farmer.image.contentType,
       data: farmer.image.data.toString('base64'),
@@ -129,6 +130,7 @@ const NData = newfeed.map((farmer) => {
     title: farmer.title,
     category: farmer.category,
     description: farmer.description,
+    date:farmer.date,
     image: {
       contentType: farmer.image.contentType,
       data: farmer.image.data.toString('base64'),
@@ -150,13 +152,22 @@ const NData = newfeed.map((farmer) => {
 
 // Update a News record by ID:
 export const updatenews = async (req, res) => {
-  const { id } = req.params;
-  const { category, title, description } = req.body;
-  const userId = req.user._id; // Assuming your authentication middleware attaches the user ID to req.user._id
+    console.log(req.body)
+  const { category, title,id, description } = req.body;
+  // Assuming your authentication middleware attaches the user ID to req.user._id
+  if (!category || !title || !id || !description) {
+    return res.status(400).json({ success: false, message: 'Value is required' });
+  }
+  if(!req.file){
+    return res.status(400).json({ success: false, message: 'image is required' });
 
+  }
+ 
+  const { id:userId } = req.params;
+ 
   try {
     const updatedNews = await newsmodel.findByIdAndUpdate(
-      id,
+      userId,
       {
         category,
         title,
@@ -165,12 +176,12 @@ export const updatenews = async (req, res) => {
           data: fs.readFileSync("uploads/" + req.file.filename),
           contentType: req.file.mimetype,
         },
-        user: userId, // Add the user ID to the news article
+        user: id, // Add the user ID to the news article
       },
       { new: true }
     );
     if (!updatedNews) {
-      return res.status(404).json({ message: 'News not found' });
+      return res.status(404).json({ message: 'Cant update' });
     }
     res.status(200).json({ message: 'News updated successfully', news: updatedNews });
   } catch (err) {
@@ -182,9 +193,9 @@ export const updatenews = async (req, res) => {
 // Delete News record by ID:
 export const deletenews = async (req, res) => {
   const { id } = req.params;
-
+console.log(id)
   try {
-    const deletedNews = await newsmodel.findByIdAndDelete(id);
+    const deletedNews = await newsmodel.findByIdAndDelete({ _id: id });
     if (!deletedNews) {
       return res.status(404).json({ message: 'News not found' });
     }

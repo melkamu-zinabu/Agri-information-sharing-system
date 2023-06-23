@@ -57,7 +57,9 @@ export const register = async (req, res) => {
 
 
     let user;
-    if (req.file) {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'image is required' });
+    }
       // If file is provided, save image data to the user
       user = new usermodel({
         name,
@@ -71,15 +73,6 @@ export const register = async (req, res) => {
           contentType: req.file.mimetype,
         },
       });
-    } else {
-      // If file is not provided, save user without the image field
-      user = new usermodel({
-        name,
-        email,
-        password: hashedPassword,
-        role,
-      });
-    }
 
     // Save the user to the database
     await user.save();
